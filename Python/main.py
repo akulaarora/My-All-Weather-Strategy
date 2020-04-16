@@ -14,16 +14,21 @@ REPO_NAME = "My-All-Weather-Strategy"
 DATABASE_NAME = "All_Weather"
 STRATEGY = "../strategy.json"
 LOG = "DONOTPUSH/errors.log"
+logger = None
+
 
 
 def main(argv):
     # Get values from JSON file
+    strategy_name = None
     portfolio_json = None
     band_threshold = None
     tickers = []
 
     with open(STRATEGY, 'r') as f:
+        strategy_json = json.loads(f)
         portfolio_json = strategy_json['Portfolio']
+        strategy_name = strategy_json["Name"]
         band_threshold = strategy_json['Percent Band Threshold']
         
     for asset in portfolio_json:
@@ -45,10 +50,14 @@ def get_stock_changes(tickers):
     """
     dict = {}
     for ticker in tickers:
-        prev_price = get_prev_price(ticker)
         today_price = get_today_price(ticker)
-        change_price = (today_price - prev_price) / prev_price * 100
-        info = {"value": ticker, "Percent Change": change_price}
+        try:
+            prev_price = get_prev_price(ticker)
+            change_price = (today_price - prev_price) / prev_price * 100
+        except Exception as e: # If I haven't already put in the data. Bad practice I know.
+            change_price = 0
+            logger.error("Could not pull value for ticker " + ticker + "from database")
+        info = {"value": change_price, "Percent Change": change_price}
         dict[ticker] = info
 
     return dict
@@ -81,22 +90,30 @@ def get_stock_changes(tickers):
                 sleep(61)
                 attempts += 1
 
-def write_balance(data_type, na)
+def get_current_portfolio():
+    search = "SELECT value FROM balance WHERE ticker = " + ticker \
+        + "GROUP BY * ORDER BY ASC LIMIT 1"
+    client = InfluxDBClient('localhost', 8086, 'root', 'root', DATABASE_NAME)
+    latest = client.query(search)
+
+def update_portfolio(curr, ticker_performance):
+
+
+def write_balance(strategy_name, fields):
     """
     Write balance to database.
     """
     data_point = [
         {
-            "measurement": "price",
+            "measurement": "balance",
             "tags": {
-                "name": name,
-                "ticker": ticker
+                "strategy": strategy_name
             },
-            "fields": {
-                "Overall Balance": value
-            }
+            "fields": fields
         }
     ]
+
+    write_point(data_point)
 
 def write_stock_price(name, ticker, fields):
     """
@@ -136,8 +153,8 @@ def update_contents():
 
 if __name__ == "__main__":
     try:
+        logger = logging.basicConfig(filename=LOG, level=logging.DEBUG, 
+                        format='%(asctime)s %(levelname)s %(name)s %(message)s')
         main(sys.argv[1:])
     except Exception as e:
-        logFile = open(LOGFILE)
-        logFile.write(e)
-        logFile.close()
+        logger.error(e)
