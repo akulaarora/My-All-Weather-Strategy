@@ -1,0 +1,45 @@
+{
+    "Percent Band Threshold": 5,
+    "Portfolio": [
+        {
+            "Name": "US Stock Market",
+            "Ticker":"",
+            "Percent Allocation": 0
+        },
+        {
+            "Name": "Long Term Treasury",
+            "Ticker":"",
+            "Percent Allocation": 40
+        },
+        {
+            "Name": "Intermediate Term Treasury",
+            "Ticker":"",
+            "Percent Allocation": 15
+        },
+        {
+            "Name": "Commodities",
+            "Ticker":"",
+            "Percent Allocation": 7.5
+        },
+        {
+            "Name": "Gold",
+            "Ticker":"",
+            "Percent Allocation": 7.5
+        },
+        {
+            "Name": "US Small Cap",
+            "Ticker":"",
+            "Percent Allocation": 15
+        },
+        {
+            "Name": "US Large Cap",
+            "Ticker":"",
+            "Percent Allocation": 10
+        },
+        {
+            "Name": "REIT",
+            "Ticker":"",
+            "Percent Allocation": 5
+        }
+    ]
+}
