@@ -40,7 +40,9 @@ For now, just display the daily information from InfluxDB on the Github page.
 
 ## Services used
 Alphavantage - financial data
+
 Docker - container
+
 Azure - hosting server
 Github - website hosting
 
