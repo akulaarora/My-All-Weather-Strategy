@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+    python:
+        build: ./Python
+        container_name: python
+        volumes:
+            - ${PWD}/strategy.json:/repo/strategy.json
+            - ${PWD}/Python:/repo/Python
+    
+    influxdb-grafana:
+        image: philhawthorne/docker-influxdb-grafana
+        container_name: influxdb-grafana
+        ports:
+            - 3003:3003
+            - 8086:8086
+            - 3004:8083
+        volumes:
+            - ${PWD}/Database/influxdb:/var/lib/influxdb
+            - ${PWD}/Database/grafana:/var/lib/grafana
