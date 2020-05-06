@@ -4,17 +4,17 @@
     "Portfolio": [
         {
             "Name": "US Stock Market",
-            "Ticker":"",
+            "Ticker":"IWV",
             "Percent Allocation": 0
         },
         {
             "Name": "Long Term Treasury",
-            "Ticker":"",
+            "Ticker":"ILTB",
             "Percent Allocation": 40
         },
         {
             "Name": "Intermediate Term Treasury",
-            "Ticker":"",
+            "Ticker":"IEF",
             "Percent Allocation": 15
         },
         {
@@ -24,22 +24,22 @@
         },
         {
             "Name": "Gold",
-            "Ticker":"",
+            "Ticker":"GLD",
             "Percent Allocation": 7.5
         },
         {
             "Name": "US Small Cap",
-            "Ticker":"",
+            "Ticker":"IJR",
             "Percent Allocation": 15
         },
         {
             "Name": "US Large Cap",
-            "Ticker":"",
+            "Ticker":"SPY",
             "Percent Allocation": 10
         },
         {
-            "Name": "REIT",
-            "Ticker":"",
+            "Name": "US REIT",
+            "Ticker":"IYR",
             "Percent Allocation": 5
         }
     ]
