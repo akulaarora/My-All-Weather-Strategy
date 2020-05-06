@@ -30,7 +30,7 @@ def main(argv):
 
     # Parse JSON into variables
     with open(STRATEGY, 'r') as f:
-        strategy_json = json.loads(f)
+        strategy_json = json.loads(f.read())
         portfolio_json = strategy_json['Portfolio']
         strategy_name = strategy_json["Name"]
         band_threshold = strategy_json['Percent Band Threshold']
@@ -165,6 +165,5 @@ if __name__ == "__main__":
         logging.basicConfig(filename=LOG, level=logging.DEBUG,
             format='%(asctime)s %(levelname)s %(name)s %(message)s')
         main(sys.argv[1:])
-        print("x")
     except Exception as e:
         logging.error(e)
