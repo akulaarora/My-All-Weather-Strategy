@@ -166,10 +166,6 @@ def rebalance_portfolio(portfolio, assets, band_threshold):
     
     return rebalanced
 
-# def update_contents():
-    # g = Github(api_keys.GH_KEY)
-    # repo = g.get_repo(REPO_NAME)
-
 
 if __name__ == "__main__":
     try:

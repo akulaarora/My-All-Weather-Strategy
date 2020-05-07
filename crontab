@@ -1,0 +1,6 @@
+# replace path with where you have pulled repostory to.
+0  14    * * 1-5 root   cd /home/akularora/My-All-Weather-Strategy && git pull
+2  14    * * 1-5 root   cd /home/akularora/My-All-Weather-Strategy && service docker start
+5  14    * * 1-5 root   cd /home/akularora/My-All-Weather-Strategy && docker-compose up -d
+10 14    * * 1-5 root   cd /home/akularora/My-All-Weather-Strategy && docker-compose down
+12 14    * * 1-5 root   cd /home/akularora/My-All-Weather-Strategy && service docker stop
