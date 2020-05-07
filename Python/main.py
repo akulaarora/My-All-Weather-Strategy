@@ -166,19 +166,16 @@ def rebalance_portfolio(portfolio, assets, band_threshold):
     
     return rebalanced
 
-        
-
-
 # def update_contents():
     # g = Github(api_keys.GH_KEY)
     # repo = g.get_repo(REPO_NAME)
 
 
 if __name__ == "__main__":
-    # try:
-    logging.basicConfig(filename=LOG, level=logging.DEBUG, \
-        format='%(asctime)s %(levelname)s %(name)s %(message)s')
+    try:
+        logging.basicConfig(filename=LOG, level=logging.DEBUG, \
+            format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
-    main(sys.argv[1:])
-# except Exception as e:
-# logging.error(e)
+        main(sys.argv[1:])
+    except Exception as e:
+        logging.error(e)
