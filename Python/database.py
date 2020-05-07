@@ -9,35 +9,54 @@ client = InfluxDBClient(DATABASE_ADDR, DATABASE_PORT, DATABASE_NAME)
 client.create_database(DATABASE_NAME)
 
 ### GETTERS
-def get_current_portfolio():
-    search = "SELECT value FROM balance " \
-        + "GROUP BY * ORDER BY ASC LIMIT 1"
-    latest = client.query(search, DATABASE_NAME)
+def get_balance_prev(strategy_name):
+    """
+    Gets the portfolio balance right now 
+    (previous in the context of now being the current).
+    Returns None if it could not be found.
+    """
+    search = "SELECT * FROM balance WHERE strategy=\'" \
+        + strategy_name + "\'" \
+        + " GROUP BY * ORDER BY ASC LIMIT 1"
+    result = client.query(search, database=DATABASE_NAME)
+    if result.keys() == []:
+        return None
 
+    ret = next(result['balance'])
+    ret.pop('time')
+
+    return ret
 
 
 def get_price_prev(ticker):
     """
-    Pulls data from InfluxDB using list of tickers.
-    Returns back previous close for ticker.
+    Pulls data from InfluxDB using ticker.
+    Returns back previous last price stored for ticker.
+    If it could not find, returns back None.
     """
     search = "SELECT value FROM price WHERE ticker =\'" + ticker + "\'" \
         + " GROUP BY * ORDER BY ASC LIMIT 1"
     result = client.query(search, database=DATABASE_NAME)
 
-    return next(result['price'])['value']
+    if result.keys() == []:
+        return None
+
+    return next(result['price'])['price']
 
 
 ### SETTERS
-def write_balance(strategy_name, fields):
+def write_balance(strategy_name, fields, balanced = False):
     """
     Writes portfolio balance to database.
+    Balanced specifies if the portfolio was created or rebalanced.
+    Balanced is a tag.
     """
     data_point = [
         {
             "measurement": "balance",
             "tags": {
-                "strategy": strategy_name
+                "strategy": strategy_name,
+                "balanced": balanced
             },
             "fields": fields
         }
@@ -46,9 +65,9 @@ def write_balance(strategy_name, fields):
     write_point(data_point)
 
 
-def write_stock_price(name, ticker, fields):
+def write_asset_price(name, ticker, fields):
     """
-    Writes stock price to database.
+    Writes asset price to database.
     """
     # TODO Might need to specify timestamp
     data_point = [

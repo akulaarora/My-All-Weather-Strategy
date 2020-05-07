@@ -28,53 +28,63 @@ def main(argv):
     strategy_name = None
     portfolio_json = None
     band_threshold = None
-    tickers = []
+    assets = None
 
     # Parse JSON into variables
     with open(STRATEGY, 'r') as f:
         strategy_json = json.loads(f.read())
-        portfolio_json = strategy_json['Portfolio']
         strategy_name = strategy_json['Name']
         band_threshold = strategy_json['Percent Band Threshold']
+        assets = strategy_json['Portfolio']
         
-    # Get all valid tickers
-    for asset in portfolio_json:
-        if asset['Ticker'] != '':
-            tickers.append(asset['Ticker'])
+    # Remove all invalid assets (no allocation or no ticker).
+    # Converts to dictionary of asset names.
+    temp = {}
+    for asset in assets:
+        if asset['Ticker'] != '' and asset['Percent Allocation'] != 0:
+            name = asset.pop('Name')
+            temp[name] = asset
+    assets = temp
 
-    # Get performance for all tickers. Stores to ticker_performance.
-    ticker_performance = get_stock_changes(tickers)
+    # Get performance for all assets.
+    assets = get_asset_changes(assets)
 
-    # Push stock's performance to database
-    for asset in portfolio_json:
+    # Push asset's performance to database
+    for name in assets.keys():
+        asset = assets[name]
         ticker = asset['Ticker']
-        if ticker != '':
-            db.write_stock_price(asset['Name'], ticker, ticker_performance[ticker])
+        fields = {'Price': asset['Price'], 'Percent Change': asset['Percent Change']}
+        db.write_asset_price(name, ticker, fields)
 
-    # Get previous portfolio values.
+    # Updates portfolio
+    balances, balanced = update_portfolio(strategy_name, assets, band_threshold)
 
-    # Calculate portfolio improvement
-    
-    update_portfolio()
+    # Writes updated portfolio balances
+    db.write_balance(strategy_name, balances, balanced=balanced)
 
-def get_stock_changes(tickers):
+def get_asset_changes(assets):
     """
-    Calculate price changes on all tickers
-    Returns dict ticker -> {"value" -> value, "Percent Change" -> percent_change}
+    Calculate price changes on all assets
+    Returns dict {asset -> 
+        {"price" -> price, "Percent Change" -> percent_change, ... (from original)} }
+    Mutates assets. Returns assets as well for ease of use.
     """
-    stock_changes = {}
-    for ticker in tickers:
-        value = get_price_curr(ticker)
-        try:
-            prev_price = db.get_price_prev(ticker)
-            percent_change = (value - prev_price) / prev_price * 100
-        except Exception: # If I haven't already put in the data. Bad practice I know.
+    for name in assets.keys():
+        asset = assets[name]
+        ticker = asset['Ticker']
+        price = get_price_curr(ticker)
+
+        prev_price = db.get_price_prev(ticker)
+        if prev_price == None:
             percent_change = 0
             logging.error("Could not pull value for ticker " + ticker + " from database")
-        info = {"value": value, "Percent Change": percent_change}
-        stock_changes[ticker] = info
+        else:
+            percent_change = (price - prev_price) / prev_price * 100
 
-    return stock_changes
+        asset['Price'] = price
+        asset['Percent Change'] = percent_change
+
+    return assets
 
 
 def get_price_curr(ticker):
@@ -94,8 +104,70 @@ def get_price_curr(ticker):
             attempts += 1
 
 
-def update_portfolio(curr, ticker_performance):
-    print()
+def update_portfolio(strategy_name, assets, band_threshold):
+    """
+    Handles all processing required to update the portfolio.
+    Returns back the balances for the updated portfolio
+    and whether the portfolio was created or rebalanced (balanced).
+    As a tuple.
+    """
+    old = db.get_balance_prev(strategy_name)
+    new = {}
+    balanced = False
+
+    if old == None:
+        new = create_portfolio(assets)
+        balanced = True
+    else:
+        total_balance = 0
+        for name in old.keys():
+            if name != 'Balance':
+                balance = old[name]
+                change = assets[name]['Percent Change'] / 100
+                new_balance = balance * (1 + change)
+                new[name] = new_balance
+                total_balance += new_balance
+        new['Balance'] = total_balance
+
+        balanced = rebalance_portfolio(new, assets, band_threshold)
+
+    return (new, balanced)
+
+def create_portfolio(assets, size = 1.0):
+    # Checks that portfolio allocation sums to 100%.
+    sum = 0
+    for name in assets.keys():
+        allocation = assets[name]['Percent Allocation']
+        sum += allocation
+    if sum != 100:
+        raise ValueError("Portfolio allocation does not sum to 100%")
+
+    portfolio = {}
+    portfolio['Balance'] = size
+    for name in assets.keys():
+        allocation = (assets[name]['Percent Allocation']) / 100
+        portfolio[name] = size * allocation
+    
+    return portfolio
+
+
+def rebalance_portfolio(portfolio, assets, band_threshold):
+    rebalanced = False
+    print(portfolio)
+    total_balance = portfolio['Balance']
+    for name in portfolio.keys():
+        if name != 'Balance':
+            asset_balance = portfolio[name]
+            allocation = assets[name]['Percent Allocation']
+            curr_allocation  = asset_balance/total_balance * 100
+            if abs(curr_allocation - allocation) >= band_threshold:
+                create_portfolio(assets, size = total_balance)
+                rebalanced = True
+                break
+    
+    return rebalanced
+
+        
 
 
 # def update_contents():
@@ -105,7 +177,7 @@ def update_portfolio(curr, ticker_performance):
 
 if __name__ == "__main__":
     # try:
-    logging.basicConfig(filename=LOG, level=logging.DEBUG,
+    logging.basicConfig(filename=LOG, level=logging.DEBUG, \
         format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
     main(sys.argv[1:])
