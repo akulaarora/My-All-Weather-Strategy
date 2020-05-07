@@ -7,5 +7,5 @@ RUN pip3 install --upgrade pip
 COPY ./requirements.txt ./repo/requirements.txt
 RUN pip3 install --no-cache-dir -r ./repo/requirements.txt --no-binary :all:
 
-# Run task
-RUN python /repo/Python/main.py
+# Temporary
+RUN tail -f /dev/null
