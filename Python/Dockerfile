@@ -7,8 +7,5 @@ RUN pip3 install --upgrade pip
 COPY ./requirements.txt ./repo/requirements.txt
 RUN pip3 install --no-cache-dir -r ./repo/requirements.txt --no-binary :all:
 
-# Temporary
-ENTRYPOINT [ "tail", "-f", "/dev/null" ]
-
-# Add cron task to run the Python script
-
+# Run task
+RUN python /repo/Python/main.py

@@ -8,6 +8,12 @@ DATABASE_NAME = "All_Weather"
 client = InfluxDBClient(DATABASE_ADDR, DATABASE_PORT, DATABASE_NAME)
 client.create_database(DATABASE_NAME)
 
+
+def print_balances():
+    result = client.query("SELECT * FROM balance", database=DATABASE_NAME)
+    for line in result.get_points():
+        print("Time: ", line['time'], "   Balance: ", line['Balance'])
+
 ### GETTERS
 def get_balance_prev(strategy_name):
     """

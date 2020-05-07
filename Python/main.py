@@ -153,7 +153,6 @@ def create_portfolio(assets, size = 1.0):
 
 def rebalance_portfolio(portfolio, assets, band_threshold):
     rebalanced = False
-    print(portfolio)
     total_balance = portfolio['Balance']
     for name in portfolio.keys():
         if name != 'Balance':
