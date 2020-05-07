@@ -6,6 +6,3 @@ RUN apk add --no-cache gcc build-base
 RUN pip3 install --upgrade pip
 COPY ./requirements.txt ./repo/requirements.txt
 RUN pip3 install --no-cache-dir -r ./repo/requirements.txt --no-binary :all:
-
-# Temporary
-RUN tail -f /dev/null

@@ -4,6 +4,9 @@ services:
     python:
         build: ./Python
         container_name: python
+        depends_on: 
+            - influxdb-grafana
+        entrypoint: ["python", "/repo/main.py"]
         volumes:
             - .:/repo/
     
