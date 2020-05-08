@@ -40,14 +40,14 @@ def get_price_prev(ticker):
     Returns back previous last price stored for ticker.
     If it could not find, returns back None.
     """
-    search = "SELECT value FROM price WHERE ticker =\'" + ticker + "\'" \
+    search = "SELECT Price FROM price WHERE ticker=\'" + ticker + "\'" \
         + " GROUP BY * ORDER BY ASC LIMIT 1"
     result = client.query(search, database=DATABASE_NAME)
 
     if result.keys() == []:
         return None
 
-    return next(result['price'])['price']
+    return next(result['price'])['Price']
 
 
 ### SETTERS
