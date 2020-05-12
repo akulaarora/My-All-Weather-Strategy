@@ -41,7 +41,7 @@ def get_price_prev(ticker):
     If it could not find, returns back None.
     """
     search = "SELECT Price FROM price WHERE ticker=\'" + ticker + "\'" \
-        + " GROUP BY * ORDER BY ASC LIMIT 1"
+        + " GROUP BY * ORDER BY DESC LIMIT 1"
     result = client.query(search, database=DATABASE_NAME)
 
     if result.keys() == []:
